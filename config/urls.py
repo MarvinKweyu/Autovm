@@ -11,6 +11,9 @@ from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
+from autovm.users.api.views import GuestRegistrationView
+
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path(
@@ -23,7 +26,6 @@ urlpatterns = [
     # User management
     path("users/", include("autovm.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
@@ -38,12 +40,27 @@ urlpatterns += [
     # DRF auth token
     path("api/auth-token/", obtain_auth_token),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path("api/account-auth/", include("dj_rest_auth.urls")),
+    path(
+        "api/account-auth/registration/",  # new
+        include("dj_rest_auth.registration.urls"),
+    ),
+    path(
+        "api/register-guest/",
+        GuestRegistrationView.as_view(),
+        name="guest-registration",
+    ),
     path(
         "api/docs/",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
 ]
+
+admin.site.site_header = "VMControl Developer Admin"
+admin.site.site_title = "Virtual Machine Control Hub Developer Admin Portal"
+admin.site.index_title = "Welcome to the VirtualMachine Control Hub Developer Portal"
+
 
 if settings.DEBUG:
     # Allow error pages to be debugged during development
