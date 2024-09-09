@@ -9,6 +9,15 @@ from autovm.users.api.views import (
     GoogleSocialLoginViewSet,
 )
 
+from autovm.resources.api.views import (
+    RegionViewSet,
+    OperatingSystemVersionViewSet,
+    VirtualMachineViewSet,
+    VirtualMachineHistoryViewSet,
+    BackupViewSet,
+    NotificationViewSet,
+)
+
 router = DefaultRouter() if settings.DEBUG else SimpleRouter()
 
 # users
@@ -18,6 +27,13 @@ router.register("customers", CustomerViewset)
 router.register("guests", GuestViewset)
 router.register("google-sign-in", GoogleSocialLoginViewSet, basename="google-sign-in")
 
+# virtual machines
+router.register("regions", RegionViewSet)
+router.register("os-versions", OperatingSystemVersionViewSet)
+router.register("virtual-machines", VirtualMachineViewSet)
+router.register("vm-history", VirtualMachineHistoryViewSet)
+router.register("backups", BackupViewSet)
+router.register("notifications", NotificationViewSet)
 
 app_name = "api"
 urlpatterns = router.urls

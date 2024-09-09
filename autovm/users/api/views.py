@@ -1,30 +1,28 @@
 import requests
-from django.db.models.query import QuerySet
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
-from rest_framework import status, viewsets
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
 from rest_framework.filters import SearchFilter
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from autovm.users.models import User, Customer, GeneralAdmin, Guest
+from autovm.users.models import Customer, GeneralAdmin, Guest, User
 
 from .serializers import (
-    UserSerializer,
-    GeneralAdminSerializer,
     CustomerUserSerializer,
-    GuestUserSerializer,
+    GeneralAdminSerializer,
     GuestRegistrationSerializer,
+    GuestUserSerializer,
+    UserSerializer,
+    CustomerSusensionSerializer,
 )
 
 
@@ -59,7 +57,7 @@ class GeneralAdminViewSet(viewsets.ModelViewSet):
     queryset = GeneralAdmin.objects.all()
     lookup_field = "pk"
     filter_backends = [SearchFilter]
-    search_fields = ["username", "name", "email"]
+    search_fields = ["user__name", "user__email"]
 
 
 class CustomerViewset(viewsets.ModelViewSet):
@@ -70,8 +68,53 @@ class CustomerViewset(viewsets.ModelViewSet):
     serializer_class = CustomerUserSerializer
     queryset = Customer.objects.all()
     lookup_field = "pk"
-    filter_backends = [SearchFilter]
-    search_fields = ["username", "name", "email"]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ["user__name", "user__email"]
+    filterset_fields = ["suspended"]
+
+    @action(detail=False, methods=["get"], name="Statistics")
+    def statistics(self, request, pk=None):
+        """
+        Get statistics of customers
+        """
+        queryset = self.get_queryset()
+        total = queryset.count()
+        active = queryset.filter(suspended=False).count()
+        inactive = queryset.filter(suspended=True).count()
+
+        total_guests = Guest.objects.count()
+
+        return Response(
+            {
+                "total": total,
+                "active": active,
+                "inactive": inactive,
+                "guests": total_guests,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Suspend",
+        serializer_class=CustomerSusensionSerializer,
+    )
+    def suspend(self, request, pk=None):
+        """
+        Suspend a customer account
+        """
+        customer = self.get_object()
+        serializer = CustomerSusensionSerializer(data=request.data)
+        if serializer.is_valid():
+            customer.suspended = serializer.data["suspend"]
+            customer.save()
+            return Response(
+                {"success": "Customer account suspended successfully"},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GuestViewset(viewsets.ModelViewSet):
@@ -83,8 +126,8 @@ class GuestViewset(viewsets.ModelViewSet):
     queryset = Guest.objects.all()
     lookup_field = "pk"
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ["username", "name", "email"]
-    filterset_fields = ["status"]
+    search_fields = ["user__name", "user__email"]
+    filterset_fields = ["status", "customer__user__email", "customer__user__id"]
 
     def get_queryset(self):
         """
@@ -105,7 +148,7 @@ class GuestViewset(viewsets.ModelViewSet):
         total = queryset.count()
         active = queryset.filter(status="active").count()
         inactive = queryset.filter(status="inactive").count()
-        
+
         return Response(
             {
                 "total": total,

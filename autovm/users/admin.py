@@ -24,7 +24,7 @@ class UserAdmin(auth_admin.UserAdmin):
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (None, {"fields": ("email", "password", "role")}),
         (_("Personal info"), {"fields": ("name",)}),
         (
             _("Permissions"),
@@ -40,7 +40,7 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    list_display = ["email", "name", "is_superuser"]
+    list_display = ["email", "name", "role", "is_superuser"]
     search_fields = ["name"]
     ordering = ["id"]
     add_fieldsets = (
@@ -70,7 +70,6 @@ class CustomerAdmin(admin.ModelAdmin):
     A client or customer of the platform.
     """
 
-    list_display = [
-        "user",
-    ]
+    list_display = ["user", "suspended"]
     search_fields = ["user__name", "user__email"]
+    list_filter = ["suspended"]
