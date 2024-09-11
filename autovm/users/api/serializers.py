@@ -32,13 +32,28 @@ class GeneralAdminSerializer(serializers.ModelSerializer[User]):
     A serializer for general admin users.
     """
 
+    name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
     class Meta:
         """
         Allowed fields for the serializer.
         """
 
         model = User
-        fields = ["id", "username", "name", "email"]
+        fields = ["id", "name", "email"]
+
+    def get_name(self, obj):
+        """
+        Name of the customer user.
+        """
+        return obj.user.name
+
+    def get_email(self, obj):
+        """
+        Email of the customer user.
+        """
+        return obj.user.email
 
 
 class CustomerUserSerializer(serializers.ModelSerializer[User]):
@@ -46,13 +61,64 @@ class CustomerUserSerializer(serializers.ModelSerializer[User]):
     A serializer for customer users.
     """
 
+    name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
+    guests = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+    suspended = serializers.SerializerMethodField()
+
     class Meta:
         """
         Allowed fields for the serializer.
         """
 
         model = User
-        fields = ["id", "username", "name", "email"]
+        fields = [
+            "id",
+            "user_id",
+            "name",
+            "suspended",
+            "email",
+            "guests",
+            "created",
+        ]
+
+    def get_name(self, obj):
+        """
+        Name of the customer user.
+        """
+        return obj.user.name
+
+    def get_email(self, obj):
+        """
+        Email of the customer user.
+        """
+        return obj.user.email
+
+    def get_user_id(self, obj):
+        """
+        Email of the customer user.
+        """
+        return obj.user.id
+
+    def get_guests(self, obj):
+        """
+        Get the number of guests for this user.
+        """
+        return Guest.objects.filter(customer=obj.user.customer_profile).count()
+
+    def get_created(self, obj):
+        """
+        Get the date the user was created.
+        """
+        return obj.user.customer_profile.created
+
+    def get_suspended(self, obj):
+        """
+        Status of the customer account
+        """
+        return obj.user.customer_profile.suspended
 
 
 class GuestUserSerializer(serializers.ModelSerializer):
@@ -69,7 +135,7 @@ class GuestUserSerializer(serializers.ModelSerializer):
         """
 
         model = Guest
-        fields = ["id", "name", "email", "status", "created"]
+        fields = ["id", "name", "email", "status"]
 
     def get_name(self, obj):
         """
@@ -138,3 +204,11 @@ class GuestRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError("A user with this name already exists.")
 
         return attrs
+
+
+class CustomerSusensionSerializer(serializers.Serializer):
+    """
+    Serializer for suspending a customer account.
+    """
+
+    suspend = serializers.BooleanField()

@@ -1,3 +1,4 @@
+import uuid
 from typing import ClassVar
 
 from django.contrib.auth.models import AbstractUser
@@ -62,6 +63,9 @@ class ProfileBase(models.Model):
     Base user profile model. Should contain fields common to all users.
     """
 
+    # _id = models.UUIDField(
+    #     default=uuid.uuid4, unique=True, editable=False, primary_key=True
+    # )
     profile_image = models.ImageField(upload_to="profile_images", null=True, blank=True)
     created = models.DateField(auto_now_add=True, null=True, blank=True)
     updated = models.DateField(auto_now_add=True, null=True, blank=True)
@@ -83,7 +87,7 @@ class GeneralAdmin(ProfileBase):
         User, on_delete=models.CASCADE, related_name="admin_profile"
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.user.email
 
     def get_absolute_url(self):
@@ -105,8 +109,9 @@ class Customer(ProfileBase):
         User, on_delete=models.CASCADE, related_name="customer_profile"
     )
     total_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    suspended = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.user.email
 
 
