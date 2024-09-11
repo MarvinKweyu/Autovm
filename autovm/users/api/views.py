@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+from dj_rest_auth.registration.views import SocialLoginView
 
 from autovm.users.models import Customer, GeneralAdmin, Guest, User
 
