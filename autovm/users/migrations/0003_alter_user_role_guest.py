@@ -8,27 +8,62 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_user_role_customer_generaladmin'),
+        ("users", "0002_user_role_customer_generaladmin"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('admin', 'General Admin'), ('customer', 'Customer'), ('guest', 'Guest')], default='customer', max_length=8),
+            model_name="user",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("admin", "General Admin"),
+                    ("customer", "Customer"),
+                    ("guest", "Guest"),
+                ],
+                default="customer",
+                max_length=8,
+            ),
         ),
         migrations.CreateModel(
-            name='Guest',
+            name="Guest",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('profile_image', models.ImageField(blank=True, null=True, upload_to='profile_images')),
-                ('created', models.DateField(auto_now_add=True, null=True)),
-                ('updated', models.DateField(auto_now_add=True, null=True)),
-                ('customer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='guests', to='users.customer')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='guest_profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "profile_image",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="profile_images"
+                    ),
+                ),
+                ("created", models.DateField(auto_now_add=True, null=True)),
+                ("updated", models.DateField(auto_now_add=True, null=True)),
+                (
+                    "customer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="guests",
+                        to="users.customer",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="guest_profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

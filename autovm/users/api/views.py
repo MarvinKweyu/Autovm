@@ -1,30 +1,33 @@
-import requests
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import validate_email
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, viewsets
+from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import RetrieveModelMixin
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from dj_rest_auth.registration.views import SocialLoginView
 
-from autovm.users.models import Customer, GeneralAdmin, Guest, User
+from autovm.billing.models import BillingAccount
+from autovm.users.models import Customer
+from autovm.users.models import GeneralAdmin
+from autovm.users.models import Guest
+from autovm.users.models import User
 
-from .serializers import (
-    CustomerUserSerializer,
-    GeneralAdminSerializer,
-    GuestRegistrationSerializer,
-    GuestUserSerializer,
-    UserSerializer,
-    CustomerSusensionSerializer,
-)
+from .serializers import CustomerSusensionSerializer
+from .serializers import CustomerUserSerializer
+from .serializers import CustomUserSerializer
+from .serializers import GeneralAdminSerializer
+from .serializers import GuestRegistrationSerializer
+from .serializers import GuestUserSerializer
+from .serializers import UserSerializer
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
@@ -178,12 +181,14 @@ class GuestRegistrationView(APIView):
         Create a guest associated with the current user.
         """
         serializer = GuestRegistrationSerializer(
-            data=request.data, context={"request": request}
+            data=request.data,
+            context={"request": request},
         )
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"success": "Guest created successfully"}, status=status.HTTP_200_OK
+                {"success": "Guest created successfully"},
+                status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -195,7 +200,7 @@ def check_required_fields(data, required_fields):
     for field in required_fields:
         if field not in data:
             return Response(
-                {"detail": f"{field.capitalize()} is required."},
+                {"message": f"{field.capitalize()} is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
     return None
@@ -203,69 +208,49 @@ def check_required_fields(data, required_fields):
 
 class GoogleSocialLoginViewSet(ModelViewSet):
     """
-    Google Social Login, Use the url below to test the endpoint;
-    https://www.googleapis.com/auth/userinfo.email
-    https://developers.google.com/oauthplayground/
-    return access_token from the url above
+    Create a new user using google aith
     """
 
     permission_classes = [AllowAny]
     http_method_names = ["post"]
+    # serializer_class = GoogleSocialSerializer
 
     def create(self, request, *args, **kwargs):
-        required_fields = ["token"]
+        required_fields = ["name", "email"]
 
         fields = check_required_fields(request.data, required_fields)
         if fields:
             return fields
 
-        token = request.data.get("token")
+        email = request.data.get("email")
+        name = request.data.get("name")
 
         try:
-            response = requests.get(
-                "https://www.googleapis.com/oauth2/v2/userinfo",
-                params={"access_token": token},
-                timeout=300,
-            )
-            response.raise_for_status()
-
-            response_data = response.json()
-            required_fields = ["email"]
-
-            fields = check_required_fields(response_data, required_fields)
-            if fields:
-                return fields
-
-            email = response_data.get("email")
-            # Validate email address format
-            try:
-                validate_email(email)
-            except ValidationError:
-                return Response(
-                    {"detail": "Invalid email address"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             user, created = User.objects.get_or_create(email=email)
+            BillingAccount.objects.get_or_create(
+                user=user,
+            )  # move this to under created
             if created:
-                user.name = response_data.get("name", "")
+                user.name = name
                 user.is_active = True
                 user.set_unusable_password()
                 user.save()
+                # only customers have billing accounts.
+                # guest accounts are already created with their email accounts
 
-            serializer = UserSerializer(user)
+            serializer = CustomUserSerializer(user, context={"request": request})
 
             token = RefreshToken.for_user(user)
             return Response(
                 {
                     "user": serializer.data,
-                    "access_token": str(token.access_token),
-                    "refresh_token": str(token),
+                    "access": str(token.access_token),
+                    "refresh": str(token),
                 },
                 status=status.HTTP_200_OK,
             )
-        except requests.HTTPError as e:
+        except Exception:
             return Response(
-                {"detail": f"Google API request failed: {e.response.text}"},
+                {"message": "Unable to authenticate user"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

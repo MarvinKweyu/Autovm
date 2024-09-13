@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_alter_guest_customer'),
+        ("users", "0004_alter_guest_customer"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='guest',
-            name='status',
-            field=models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active', max_length=8),
+            model_name="guest",
+            name="status",
+            field=models.CharField(
+                choices=[("active", "Active"), ("inactive", "Inactive")],
+                default="active",
+                max_length=8,
+            ),
         ),
     ]

@@ -16,54 +16,143 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='RatePlan',
+            name="RatePlan",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('plan', models.CharField(choices=[('bronze', 'Bronze'), ('silver', 'Silver'), ('gold', 'Gold'), ('platinum', 'Platinum')], default='bronze', max_length=10)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('vm_limit', models.IntegerField(default=2)),
-                ('backup_limit', models.IntegerField(default=2)),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                (
+                    "plan",
+                    models.CharField(
+                        choices=[
+                            ("bronze", "Bronze"),
+                            ("silver", "Silver"),
+                            ("gold", "Gold"),
+                            ("platinum", "Platinum"),
+                        ],
+                        default="bronze",
+                        max_length=10,
+                    ),
+                ),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("vm_limit", models.IntegerField(default=2)),
+                ("backup_limit", models.IntegerField(default=2)),
             ],
             options={
-                'ordering': ['-created'],
-                'abstract': False,
+                "ordering": ["-created"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Subscription',
+            name="Subscription",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('running', models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive')], default='inactive', max_length=10)),
-                ('plan', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='billing.rateplan')),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                (
+                    "running",
+                    models.CharField(
+                        choices=[("active", "Active"), ("inactive", "Inactive")],
+                        default="inactive",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "plan",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="billing.rateplan",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created'],
-                'abstract': False,
+                "ordering": ["-created"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('payment_method', models.CharField(max_length=8, null=True)),
-                ('transaction_no', models.CharField(blank=True, max_length=255, null=True)),
-                ('receipt_no', models.CharField(blank=True, max_length=255, null=True)),
-                ('payment_ref', models.CharField(blank=True, max_length=255, null=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('status', models.CharField(choices=[('processing', 'Processing'), ('completed', 'Completed'), ('cancelled', 'Cancelled')], default='processing', max_length=15)),
-                ('subscription', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='billing.subscription')),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("payment_method", models.CharField(max_length=8, null=True)),
+                (
+                    "transaction_no",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("receipt_no", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "payment_ref",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="processing",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "subscription",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="transactions",
+                        to="billing.subscription",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created'],
-                'abstract': False,
+                "ordering": ["-created"],
+                "abstract": False,
             },
         ),
     ]

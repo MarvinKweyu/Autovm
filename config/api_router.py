@@ -1,29 +1,22 @@
 from django.conf import settings
-from rest_framework.routers import SimpleRouter, DefaultRouter
+from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
-from autovm.users.api.views import (
-    UserViewSet,
-    GeneralAdminViewSet,
-    CustomerViewset,
-    GuestViewset,
-    GoogleSocialLoginViewSet,
-)
-
-from autovm.resources.api.views import (
-    RegionViewSet,
-    OperatingSystemVersionViewSet,
-    VirtualMachineViewSet,
-    VirtualMachineHistoryViewSet,
-    BackupViewSet,
-    NotificationViewSet,
-)
-
-from autovm.billing.api.views import (
-    RatePlanViewSet,
-    SubscriptionViewSet,
-    TransactionViewSet,
-    BillingAccountViewSet,
-)
+from autovm.billing.api.views import BillingAccountViewSet
+from autovm.billing.api.views import RatePlanViewSet
+from autovm.billing.api.views import SubscriptionViewSet
+from autovm.billing.api.views import TransactionViewSet
+from autovm.resources.api.views import BackupViewSet
+from autovm.resources.api.views import NotificationViewSet
+from autovm.resources.api.views import OperatingSystemVersionViewSet
+from autovm.resources.api.views import RegionViewSet
+from autovm.resources.api.views import VirtualMachineHistoryViewSet
+from autovm.resources.api.views import VirtualMachineViewSet
+from autovm.users.api.views import CustomerViewset
+from autovm.users.api.views import GeneralAdminViewSet
+from autovm.users.api.views import GoogleSocialLoginViewSet
+from autovm.users.api.views import GuestViewset
+from autovm.users.api.views import UserViewSet
 
 router = DefaultRouter() if settings.DEBUG else SimpleRouter()
 
@@ -32,7 +25,7 @@ router.register("users", UserViewSet)
 router.register("admins", GeneralAdminViewSet)
 router.register("customers", CustomerViewset)
 router.register("guests", GuestViewset)
-router.register("google-sign-in", GoogleSocialLoginViewSet, basename="google-sign-in")
+router.register("google-auth", GoogleSocialLoginViewSet, basename="google-auth")
 
 # resources
 router.register("regions", RegionViewSet)

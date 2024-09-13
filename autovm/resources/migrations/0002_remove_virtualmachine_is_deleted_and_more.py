@@ -9,51 +9,94 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('resources', '0001_initial'),
+        ("resources", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='virtualmachine',
-            name='is_deleted',
+            model_name="virtualmachine",
+            name="is_deleted",
         ),
         migrations.AddField(
-            model_name='virtualmachine',
-            name='disk_size',
-            field=models.IntegerField(default=50, help_text='Disk size in GB'),
+            model_name="virtualmachine",
+            name="disk_size",
+            field=models.IntegerField(default=50, help_text="Disk size in GB"),
         ),
         migrations.AddField(
-            model_name='virtualmachinehistory',
-            name='action',
-            field=models.CharField(choices=[('create_vm', 'Create VM'), ('delete_vm', 'Delete VM'), ('move_vm', 'Move VM'), ('backup_vm', 'Backup VM'), ('start_vm', 'Start VM'), ('stop_vm', 'Stop VM')], default='create_vm', max_length=20),
+            model_name="virtualmachinehistory",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("create_vm", "Create VM"),
+                    ("delete_vm", "Delete VM"),
+                    ("move_vm", "Move VM"),
+                    ("backup_vm", "Backup VM"),
+                    ("start_vm", "Start VM"),
+                    ("stop_vm", "Stop VM"),
+                ],
+                default="create_vm",
+                max_length=20,
+            ),
         ),
         migrations.CreateModel(
-            name='Backup',
+            name="Backup",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('size', models.IntegerField(help_text='Backup size in GB')),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('vm', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='backups', to='resources.virtualmachine')),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("size", models.IntegerField(help_text="Backup size in GB")),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "vm",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="backups",
+                        to="resources.virtualmachine",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('message', models.CharField(max_length=255)),
-                ('read', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("message", models.CharField(max_length=255)),
+                ("read", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

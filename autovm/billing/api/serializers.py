@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from autovm.billing.models import RatePlan, BillingAccount, Subscription, Transaction
+
+from autovm.billing.models import BillingAccount
+from autovm.billing.models import RatePlan
+from autovm.billing.models import Subscription
+from autovm.billing.models import Transaction
 from autovm.billing.utils.payment_client import PaymentClient
 
 
@@ -59,7 +63,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         # get or create a subscription
         # match the user account with the subscription. that is, only create a new subscription if the user has an account
         subscription, created = Subscription.objects.get_or_create(
-            account=user_account, status="active", defaults={"plan": plan}
+            account=user_account,
+            status="active",
+            defaults={"plan": plan},
         )
 
         updated_balance = user_account.amount - subscription.plan.price

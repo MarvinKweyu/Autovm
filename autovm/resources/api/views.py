@@ -1,32 +1,27 @@
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 
-from autovm.resources.models import (
-    Backup,
-    Notification,
-    OperatingSystemVersion,
-    Region,
-    VirtualMachine,
-    VirtualMachineHistory,
-)
-
-from autovm.users.models import User
 from autovm.billing.models import Subscription
+from autovm.resources.models import Backup
+from autovm.resources.models import Notification
+from autovm.resources.models import OperatingSystemVersion
+from autovm.resources.models import Region
+from autovm.resources.models import VirtualMachine
+from autovm.resources.models import VirtualMachineHistory
+from autovm.users.models import User
 
-from .serializers import (
-    BackupSerializer,
-    NotificationSerializer,
-    OperatingSystemVersionSerializer,
-    RegionSerializer,
-    VirtualMachineHistorySerializer,
-    VirtualMachineSerializer,
-    AssignmentSerializer,
-)
+from .serializers import AssignmentSerializer
+from .serializers import BackupSerializer
+from .serializers import NotificationSerializer
+from .serializers import OperatingSystemVersionSerializer
+from .serializers import RegionSerializer
+from .serializers import VirtualMachineHistorySerializer
+from .serializers import VirtualMachineSerializer
 
 
 class OperatingSystemVersionViewSet(ModelViewSet):
@@ -74,7 +69,8 @@ class VirtualMachineViewSet(ModelViewSet):
         "description",
     ]
 
-    # if this is the admin user, return all virtual machines, else, return only those that belong to the user making teh request
+    # if this is the admin user, return all virtual machines, else,
+    # return only those that belong to the user making teh request
     def get_queryset(self):
         if self.request.user.role == "admin":
             return VirtualMachine.objects.all()
@@ -84,11 +80,6 @@ class VirtualMachineViewSet(ModelViewSet):
         """
         Check the current active subscription of the user.
         """
-        # get the user from the serializer context
-        serializer_data = request.data
-        vm_user = serializer_data.get("user")
-        vm_user = User.objects.get(id=vm_user)
-
         user = self.request.user
         if user.role == "admin":
             return super().create(request, *args, **kwargs)
@@ -96,11 +87,11 @@ class VirtualMachineViewSet(ModelViewSet):
             # get the billing account
             account = user.billingaccount
             customer_profile = user.customer_profile
-            subscription = user.subscription_set.filter(status="active").first()
             active_subscription = Subscription.objects.filter(
-                account=account, status="active"
+                account=account,
+                status="active",
             ).first()
-            if not subscription:
+            if not active_subscription:
                 return Response(
                     {"message": "You do not have an active subscription."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -118,7 +109,9 @@ class VirtualMachineViewSet(ModelViewSet):
             if vm_count >= vm_limit:
                 return Response(
                     {
-                        "message": "You have reached the virtual machine limit for your subscription. Please upgrade your plan to create more virtual machines."
+                        "message": """You have reached the virtual machine
+                        limit for your subscription. Please upgrade your
+                        plan to create more virtual machines.""",
                     },
                     status=status.HTTP_402_PAYMENT_REQUIRED,
                 )
@@ -153,7 +146,8 @@ class VirtualMachineViewSet(ModelViewSet):
         account = virtual_machine.user.billingaccount
 
         active_subscription = Subscription.objects.filter(
-            account=account, status="active"
+            account=account,
+            status="active",
         ).first()
         # customer profiile from account
         customer_profile = account.user.customer_profile
@@ -179,7 +173,9 @@ class VirtualMachineViewSet(ModelViewSet):
         if backup_count >= backup_limit:
             return Response(
                 {
-                    "message": "You have reached the backup limit for this virtual machine. Please upgrade your plan to create more backups."
+                    "message": """You have reached the backup limit for this
+                    virtual machine. Please upgrade your plan to create more
+                    backups.""",
                 },
                 status=status.HTTP_402_PAYMENT_REQUIRED,
             )
@@ -211,14 +207,14 @@ class VirtualMachineViewSet(ModelViewSet):
         serializer = AssignmentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-
             user = self.request.user
             # get the target user from the serializer
             assigned_user_id = serializer.validated_data["user_id"]
             assigned_user = User.objects.get(id=assigned_user_id)
 
             active_subscription = Subscription.objects.filter(
-                account=assigned_user.billingaccount, status="active"
+                account=assigned_user.billingaccount,
+                status="active",
             ).first()
 
             if not active_subscription:
@@ -233,7 +229,9 @@ class VirtualMachineViewSet(ModelViewSet):
             if vm_count >= vm_limit:
                 return Response(
                     {
-                        "message": "the limit has been reached for virtual machines. Please upgrade this plan to create more virtual machines."
+                        "message": """The limit has been reached for virtual
+                          machines. Please upgrade this plan to create more
+                          virtual machines.""",
                     },
                     status=status.HTTP_402_PAYMENT_REQUIRED,
                 )
@@ -259,7 +257,8 @@ class VirtualMachineViewSet(ModelViewSet):
                 notifications = [
                     Notification(
                         user=previous_user,
-                        message=f"Virtual machine {virtual_machine.name} has been unassigned from you.",
+                        message=f"""Virtual machine {virtual_machine.name} has
+                        been unassigned from you.""",
                     ),
                     Notification(
                         user=assigned_user,

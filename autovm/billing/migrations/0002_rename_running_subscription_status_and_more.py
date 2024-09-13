@@ -9,46 +9,72 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('billing', '0001_initial'),
+        ("billing", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='subscription',
-            old_name='running',
-            new_name='status',
+            model_name="subscription",
+            old_name="running",
+            new_name="status",
         ),
         migrations.RemoveField(
-            model_name='subscription',
-            name='user',
+            model_name="subscription",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='subscription',
+            model_name="transaction",
+            name="subscription",
         ),
         migrations.CreateModel(
-            name='BillingAccount',
+            name="BillingAccount",
             fields=[
-                ('_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created'],
-                'abstract': False,
+                "ordering": ["-created"],
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='subscription',
-            name='account',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='billing.billingaccount'),
+            model_name="subscription",
+            name="account",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="billing.billingaccount",
+            ),
         ),
         migrations.AddField(
-            model_name='transaction',
-            name='account',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='billing.billingaccount'),
+            model_name="transaction",
+            name="account",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="transactions",
+                to="billing.billingaccount",
+            ),
         ),
     ]

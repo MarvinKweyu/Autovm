@@ -1,5 +1,7 @@
 import uuid
+
 from django.db import models
+
 from autovm.users.models import User
 
 
@@ -9,7 +11,10 @@ class CommonBaseModel(models.Model):
     """
 
     _id = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False, primary_key=True
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        primary_key=True,
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

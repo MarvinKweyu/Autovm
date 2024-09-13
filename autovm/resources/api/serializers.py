@@ -1,13 +1,11 @@
 from rest_framework import serializers
 
-from autovm.resources.models import (
-    OperatingSystemVersion,
-    Region,
-    VirtualMachine,
-    VirtualMachineHistory,
-    Backup,
-    Notification,
-)
+from autovm.resources.models import Backup
+from autovm.resources.models import Notification
+from autovm.resources.models import OperatingSystemVersion
+from autovm.resources.models import Region
+from autovm.resources.models import VirtualMachine
+from autovm.resources.models import VirtualMachineHistory
 
 
 class VirtualMachineHistorySerializer(serializers.ModelSerializer):

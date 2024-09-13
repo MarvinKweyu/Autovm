@@ -1,14 +1,12 @@
 from django.contrib import admin
 
-from autovm.resources.models import (
-    VirtualMachine,
-    VirtualMachineHistory,
-    Backup,
-    OperatingSystem,
-    OperatingSystemVersion,
-    Region,
-    Notification,
-)
+from autovm.resources.models import Backup
+from autovm.resources.models import Notification
+from autovm.resources.models import OperatingSystem
+from autovm.resources.models import OperatingSystemVersion
+from autovm.resources.models import Region
+from autovm.resources.models import VirtualMachine
+from autovm.resources.models import VirtualMachineHistory
 
 
 @admin.register(VirtualMachine)
