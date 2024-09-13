@@ -4,7 +4,9 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate, get_user_model
 
 from autovm.users.models import User, Customer, Guest
-from django.db.utils import IntegrityError
+from autovm.billing.models import BillingAccount
+from autovm.billing.api.serializers import RatePlanSerializer
+from autovm.resources.models import VirtualMachine
 
 UserModel = get_user_model()
 
@@ -67,6 +69,9 @@ class CustomerUserSerializer(serializers.ModelSerializer[User]):
     guests = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     suspended = serializers.SerializerMethodField()
+    account_balance = serializers.SerializerMethodField()
+    current_plan = serializers.SerializerMethodField()
+    # virtual_machines = serializers.SerializerMethodField()
 
     class Meta:
         """
@@ -79,6 +84,9 @@ class CustomerUserSerializer(serializers.ModelSerializer[User]):
             "user_id",
             "name",
             "suspended",
+            "account_balance",
+            "current_plan",
+            # "virtual_machines",
             "email",
             "guests",
             "created",
@@ -119,6 +127,36 @@ class CustomerUserSerializer(serializers.ModelSerializer[User]):
         Status of the customer account
         """
         return obj.user.customer_profile.suspended
+
+    def get_account_balance(self, obj):
+        """
+        Get the account balance of the customer.
+        """
+        billing_account = 0
+
+        billing_account, created = BillingAccount.objects.get_or_create(user=obj.user)
+
+        return billing_account.amount
+
+    def get_current_plan(self, obj):
+        """
+        Get the current plan of the customer.
+        """
+        billing_account, created = BillingAccount.objects.get_or_create(user=obj.user)
+        # get the subscription
+        subscription = billing_account.subscription_set.filter(status="active").first()
+        if subscription:
+            # serialize the plan
+            return RatePlanSerializer(subscription.plan).data
+
+        return "No active plan"
+
+    # def get_virtual_machines(self, obj):
+    #     """
+    #     Return the number of virtual machines for this customer.
+    #     """
+
+    #     return VirtualMachine.objects.filter(user=obj.user).count()
 
 
 class GuestUserSerializer(serializers.ModelSerializer):

@@ -37,6 +37,20 @@ class VirtualMachineHistorySerializer(serializers.ModelSerializer):
         }
 
 
+class BackupSerializer(serializers.ModelSerializer):
+    """
+    Backup serializer.
+    """
+
+    class Meta:
+        """
+        Fields to render in the serializer.
+        """
+
+        model = Backup
+        fields = ["_id", "vm", "size", "created"]
+
+
 class VirtualMachineSerializer(serializers.ModelSerializer):
     """
     Virtual Machine serializer.
@@ -45,6 +59,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
     operating_system = serializers.SerializerMethodField(read_only=True)
     region_name = serializers.SerializerMethodField(read_only=True)
     last_backup = serializers.SerializerMethodField(read_only=True)
+    backups = BackupSerializer(read_only=True, required=False, many=True)
     history = VirtualMachineHistorySerializer(required=False, many=True, read_only=True)
     user_info = serializers.SerializerMethodField(read_only=True)
 
@@ -61,6 +76,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
             "description",
             "last_backup",
             "operating_system",
+            "backups",
             "history",
             "operating_system_version",
             "is_active",
@@ -79,8 +95,10 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         """
         user = self.context["request"].user
 
-        if user.role == "customer":
+        if user.role == "customer" or user.role == "admin":
             validated_data["user"] = user
+
+        # get the subscription of the user
 
         virtual_machine = VirtualMachine.objects.create(**validated_data)
         VirtualMachineHistory.objects.create(
@@ -123,20 +141,6 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
             "email": obj.user.email,
             "role": obj.user.role,
         }
-
-
-class BackupSerializer(serializers.ModelSerializer):
-    """
-    Backup serializer.
-    """
-
-    class Meta:
-        """
-        Fields to render in the serializer.
-        """
-
-        model = Backup
-        fields = ["_id", "vm", "size", "created"]
 
 
 class NotificationSerializer(serializers.ModelSerializer):

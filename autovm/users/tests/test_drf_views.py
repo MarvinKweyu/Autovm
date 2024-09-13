@@ -20,6 +20,9 @@ class TestUserViewSet:
         assert user in view.get_queryset()
 
     def test_me(self, user: User, api_rf: APIRequestFactory):
+        """
+        The user should be able to see their own profile.
+        """
         view = UserViewSet()
         request = api_rf.get("/fake-url/")
         request.user = user
@@ -31,4 +34,6 @@ class TestUserViewSet:
         assert response.data == {
             "url": f"http://testserver/api/users/{user.pk}/",
             "name": user.name,
+            "username": user.username,
+            "role": user.role,
         }
