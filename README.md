@@ -31,7 +31,7 @@ docker compose -f docker-compose.local.yml up
 Access the administrative dashboard on `http://127.0.0.1:8000/admin`.
 
 **For this setup , administrative credentials have been provided as below:**
-> [!NOTE]  
+> [!NOTE]
 > For this setup , administrative credentials have been provided as below:
 
 Email:
@@ -67,4 +67,3 @@ To run the tests, check your test coverage, and generate an HTML coverage report
 
 
 ## Deployment
-

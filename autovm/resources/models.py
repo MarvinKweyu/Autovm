@@ -2,7 +2,6 @@ import uuid
 
 import slugify
 from django.db import models
-from django.db.models.signals import post_save
 
 from autovm.resources.utils.generate_vm_name import generate_vm_name
 from autovm.users.models import User
@@ -14,7 +13,10 @@ class CommonBaseModel(models.Model):
     """
 
     _id = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False, primary_key=True
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        primary_key=True,
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -46,7 +48,9 @@ class OperatingSystemVersion(CommonBaseModel):
     """
 
     operating_system = models.ForeignKey(
-        OperatingSystem, on_delete=models.CASCADE, related_name="versions"
+        OperatingSystem,
+        on_delete=models.CASCADE,
+        related_name="versions",
     )
     version = models.CharField(max_length=20)
 
@@ -86,7 +90,9 @@ class VirtualMachine(CommonBaseModel):
     )
 
     operating_system_version = models.ForeignKey(
-        OperatingSystemVersion, on_delete=models.SET_NULL, null=True
+        OperatingSystemVersion,
+        on_delete=models.SET_NULL,
+        null=True,
     )
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
     # ToDo: pricing fields
@@ -98,7 +104,9 @@ class VirtualMachine(CommonBaseModel):
         ("monthly", "Monthly"),
     ]
     backup_freq = models.CharField(
-        max_length=20, choices=backup_frequency, default="daily"
+        max_length=20,
+        choices=backup_frequency,
+        default="daily",
     )
     is_active = models.BooleanField(default=True)
 
@@ -133,7 +141,10 @@ class VirtualMachineHistory(CommonBaseModel):
     """
 
     virtual_machine = models.ForeignKey(
-        VirtualMachine, on_delete=models.SET_NULL, null=True, related_name="history"
+        VirtualMachine,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="history",
     )
     ACTION_CHOICES = [
         ("create_vm", "Create VM"),
@@ -144,7 +155,9 @@ class VirtualMachineHistory(CommonBaseModel):
         ("stop_vm", "Stop VM"),
     ]
     action = models.CharField(
-        max_length=20, choices=ACTION_CHOICES, default="create_vm"
+        max_length=20,
+        choices=ACTION_CHOICES,
+        default="create_vm",
     )
     description = models.TextField(blank=True)
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
@@ -166,7 +179,9 @@ class Backup(CommonBaseModel):
     """
 
     vm = models.ForeignKey(
-        VirtualMachine, on_delete=models.CASCADE, related_name="backups"
+        VirtualMachine,
+        on_delete=models.CASCADE,
+        related_name="backups",
     )
 
     # since the size of a vm can be edited, we store this at the time of backup
@@ -182,7 +197,9 @@ class Notification(CommonBaseModel):
     """
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="notifications"
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
     )
     message = models.CharField(max_length=255)
     read = models.BooleanField(default=False)

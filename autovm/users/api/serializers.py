@@ -1,12 +1,11 @@
-import random
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from django.contrib.auth import authenticate, get_user_model
 
-from autovm.users.models import User, Customer, Guest
-from autovm.billing.models import BillingAccount
 from autovm.billing.api.serializers import RatePlanSerializer
-from autovm.resources.models import VirtualMachine
+from autovm.billing.models import BillingAccount
+from autovm.users.models import Customer
+from autovm.users.models import Guest
+from autovm.users.models import User
 
 UserModel = get_user_model()
 
@@ -27,6 +26,33 @@ class UserSerializer(serializers.ModelSerializer[User]):
         extra_kwargs = {
             "url": {"view_name": "api:user-detail", "lookup_field": "pk"},
         }
+
+
+class CustomUserSerializer(serializers.ModelSerializer[User]):
+    """
+    user serializer
+    """
+
+    pk = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        """
+        Fields to render in the serializer.
+        """
+
+        model = User
+        fields = ["pk", "name", "email", "username", "role", "url"]
+
+        extra_kwargs = {
+            "url": {"view_name": "api:user-detail", "lookup_field": "pk"},
+        }
+
+    def get_pk(self, obj):
+        """
+        Return the id as a pk
+        """
+        # the id is same as pk
+        return obj.id
 
 
 class GeneralAdminSerializer(serializers.ModelSerializer[User]):
@@ -202,11 +228,7 @@ class GuestRegistrationSerializer(serializers.Serializer):
         # get the customer making the request
         customer = Customer.objects.get(user_id=current_user)
 
-        # Create the user with the validated data
-        # generate a random number between 1 and 999999
-        otp = random.randint(100000, 999999)
         password = User.objects.make_random_password()
-        username = validated_data["name"] + str(otp)
 
         # get the user making the request
         new_user = None
@@ -234,7 +256,6 @@ class GuestRegistrationSerializer(serializers.Serializer):
         return new_user
 
     def validate(self, attrs):
-
         if User.objects.filter(email=attrs["email"]).exists():
             serializers.ValidationError("This email is already registered")
 
@@ -250,3 +271,12 @@ class CustomerSusensionSerializer(serializers.Serializer):
     """
 
     suspend = serializers.BooleanField()
+
+
+class GoogleSocialSerializer(serializers.Serializer):
+    """
+    Authenticate with google
+    """
+
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()

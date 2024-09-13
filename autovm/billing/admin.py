@@ -1,6 +1,9 @@
 from django.contrib import admin
 
-from autovm.billing.models import RatePlan, BillingAccount, Subscription, Transaction
+from autovm.billing.models import BillingAccount
+from autovm.billing.models import RatePlan
+from autovm.billing.models import Subscription
+from autovm.billing.models import Transaction
 
 
 @admin.register(RatePlan)

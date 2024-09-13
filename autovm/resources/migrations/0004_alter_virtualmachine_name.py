@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('resources', '0003_operatingsystem_region_virtualmachine_backup_freq_and_more'),
+        (
+            "resources",
+            "0003_operatingsystem_region_virtualmachine_backup_freq_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='virtualmachine',
-            name='name',
+            model_name="virtualmachine",
+            name="name",
             field=models.CharField(max_length=15, unique=True),
         ),
     ]

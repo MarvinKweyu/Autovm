@@ -1,9 +1,7 @@
 # a mock to create a payment client
-import json
 import logging
 import random
 import string
-
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +15,6 @@ class PaymentClient:
         """
         Initialize the payment client.
         """
-        pass
 
     def make_payment(self) -> str:
         """
@@ -33,13 +30,13 @@ class PaymentClient:
 
         # create random strings for payment_method, transaction_no, receipt_no, payment_ref, status and description
         transaction_no = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=10)
+            random.choices(string.ascii_uppercase + string.digits, k=10),
         )
         receipt_no = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=10)
+            random.choices(string.ascii_uppercase + string.digits, k=10),
         )
         payment_ref = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=10)
+            random.choices(string.ascii_uppercase + string.digits, k=10),
         )
         payment_method = random.choice(["card", "paypal", "stripe"])
         status = random.choice(["processing", "completed", "cancelled"])

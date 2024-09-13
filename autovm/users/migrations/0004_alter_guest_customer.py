@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0003_alter_user_role_guest'),
+        ("users", "0003_alter_user_role_guest"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='guest',
-            name='customer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='guests', to='users.customer'),
+            model_name="guest",
+            name="customer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="guests",
+                to="users.customer",
+            ),
         ),
     ]
