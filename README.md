@@ -25,14 +25,18 @@ A virtual machine management system
 ### Running a local instance
 
 ```bash
+docker compose -f docker-compose.local.yml build
 docker compose -f docker-compose.local.yml up
 ```
-
+You can run your migrations or commands against the project with:
+```bash
+docker compose -f docker-compose.local.yml run --rm django python manage.py createsuperuser
+```
 Access the administrative dashboard on `http://127.0.0.1:8000/admin`.
 
 **For this setup , administrative credentials have been provided as below:**
-> [!NOTE]
-> For this setup , administrative credentials have been provided as below:
+> [!NOTE]  
+> (WIP) For this setup , administrative credentials have been provided as below:
 
 Email:
 
@@ -41,7 +45,7 @@ Password:
 
 ### Email Server
 
-To test email notifications sent to users  local SMTP server [Mailpit](https://github.com/axllent/mailpit) with a web interface is available as docker container at `http://127.0.0.1:8025`
+To test email notifications sent to users local SMTP server [Mailpit](https://github.com/axllent/mailpit) with a web interface is available as docker container at `http://127.0.0.1:8025`
 
 ### Setting Up Users
 
@@ -67,3 +71,4 @@ To run the tests, check your test coverage, and generate an HTML coverage report
 
 
 ## Deployment
+

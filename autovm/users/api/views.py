@@ -1,33 +1,32 @@
+import requests
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import status, viewsets, views
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.mixins import ListModelMixin
-from rest_framework.mixins import RetrieveModelMixin
-from rest_framework.mixins import UpdateModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from autovm.users.models import Customer, GeneralAdmin, Guest, User
 from autovm.billing.models import BillingAccount
-from autovm.users.models import Customer
-from autovm.users.models import GeneralAdmin
-from autovm.users.models import Guest
-from autovm.users.models import User
 
-from .serializers import CustomerSusensionSerializer
-from .serializers import CustomerUserSerializer
-from .serializers import CustomUserSerializer
-from .serializers import GeneralAdminSerializer
-from .serializers import GuestRegistrationSerializer
-from .serializers import GuestUserSerializer
-from .serializers import UserSerializer
+from .serializers import (
+    CustomerUserSerializer,
+    GeneralAdminSerializer,
+    GuestRegistrationSerializer,
+    GoogleSocialSerializer,
+    CustomUserSerializer,
+    GuestUserSerializer,
+    UserSerializer,
+    CustomerSusensionSerializer,
+)
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
@@ -181,14 +180,21 @@ class GuestRegistrationView(APIView):
         Create a guest associated with the current user.
         """
         serializer = GuestRegistrationSerializer(
-            data=request.data,
-            context={"request": request},
+            data=request.data, context={"request": request}
         )
         if serializer.is_valid():
+            # get the customer making the request
+            customer = Customer.objects.get(user=request.user)
+            # get the billing account of the user making the request
+            if customer.suspended:
+                return Response(
+                    {"message": "Your account has been suspended"},
+                    status=status.HTTP_402_PAYMENT_REQUIRED,
+                )
+
             serializer.save()
             return Response(
-                {"success": "Guest created successfully"},
-                status=status.HTTP_200_OK,
+                {"success": "Guest created successfully"}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -228,7 +234,7 @@ class GoogleSocialLoginViewSet(ModelViewSet):
         try:
             user, created = User.objects.get_or_create(email=email)
             BillingAccount.objects.get_or_create(
-                user=user,
+                user=user
             )  # move this to under created
             if created:
                 user.name = name
@@ -249,7 +255,7 @@ class GoogleSocialLoginViewSet(ModelViewSet):
                 },
                 status=status.HTTP_200_OK,
             )
-        except Exception:
+        except Exception as e:
             return Response(
                 {"message": "Unable to authenticate user"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

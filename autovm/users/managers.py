@@ -1,3 +1,5 @@
+import string
+import secrets
 from typing import TYPE_CHECKING
 
 from django.contrib.auth.hashers import make_password
@@ -40,3 +42,11 @@ class UserManager(DjangoUserManager["User"]):
             raise ValueError(msg)
 
         return self._create_user(email, password, **extra_fields)
+
+    def make_random_password(self):
+        """
+        GEnerate a random password for a user.
+        """
+        alphabet = string.ascii_letters + string.digits
+        password = "".join(secrets.choice(alphabet) for i in range(8))
+        return password
