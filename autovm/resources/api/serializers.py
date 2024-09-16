@@ -49,15 +49,29 @@ class BackupSerializer(serializers.ModelSerializer):
         fields = ["_id", "vm", "size", "created"]
 
 
+class RegionSerializer(serializers.ModelSerializer):
+    """
+    Region serializer.
+    """
+
+    class Meta:
+        """
+        Fields to render in the serializer.
+        """
+
+        model = Region
+        fields = ["_id", "name", "created", "updated"]
+
+
 class VirtualMachineSerializer(serializers.ModelSerializer):
     """
     Virtual Machine serializer.
     """
 
     operating_system = serializers.SerializerMethodField(read_only=True)
-    region_name = serializers.SerializerMethodField(read_only=True)
+    region = RegionSerializer(read_only=True, required=False)
     last_backup = serializers.SerializerMethodField(read_only=True)
-    backups = BackupSerializer(read_only=True, required=False, many=True)
+    backups = serializers.SerializerMethodField(read_only=True)
     history = VirtualMachineHistorySerializer(required=False, many=True, read_only=True)
     user_info = serializers.SerializerMethodField(read_only=True)
 
@@ -70,7 +84,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         fields = [
             "_id",
             "name",
-            "region_name",
+            "region",
             "description",
             "last_backup",
             "operating_system",
@@ -114,12 +128,6 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         """
         return obj.operating_system_version.operating_system.name
 
-    def get_region_name(self, obj):
-        """
-        Get the region name of the virtual machine.
-        """
-        return "obj.region.name"
-
     def get_last_backup(self, obj):
         """
         Get the last backup of the virtual machine.
@@ -128,6 +136,15 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         if backup:
             return backup.created
         return None
+
+    def get_backups(self, obj):
+        """
+        Get the backups of the virtual machine.
+        """
+        backups = Backup.objects.filter(vm=obj)
+        # serialize backups
+        backups = BackupSerializer(backups, many=True).data
+        return backups
 
     def get_user_info(self, obj):
         """
@@ -153,20 +170,6 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         model = Notification
         fields = ["_id", "user", "message", "read", "created"]
-
-
-class RegionSerializer(serializers.ModelSerializer):
-    """
-    Region serializer.
-    """
-
-    class Meta:
-        """
-        Fields to render in the serializer.
-        """
-
-        model = Region
-        fields = ["_id", "name", "created", "updated"]
 
 
 class OperatingSystemVersionSerializer(serializers.ModelSerializer):

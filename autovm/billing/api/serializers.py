@@ -78,6 +78,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             subscription.save()
             # create a new subscription
             subscription = Subscription.objects.create(account=user_account, plan=plan)
+            # create a transaction related with this subscription
+            details = PaymentClient().make_payment()
+
+            Transaction.objects.create(
+                account=user_account, amount=subscription.plan.price, **details
+            )
 
         user_account.amount = updated_balance
         user_account.save()

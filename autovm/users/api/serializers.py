@@ -1,11 +1,12 @@
-from django.contrib.auth import get_user_model
+import random
+from django.conf import settings
 from rest_framework import serializers
+from django.contrib.auth import authenticate, get_user_model
 
-from autovm.billing.api.serializers import RatePlanSerializer
+from autovm.users.models import User, Customer, Guest
 from autovm.billing.models import BillingAccount
-from autovm.users.models import Customer
-from autovm.users.models import Guest
-from autovm.users.models import User
+from autovm.billing.api.serializers import RatePlanSerializer
+from autovm.resources.models import VirtualMachine
 
 UserModel = get_user_model()
 
@@ -199,7 +200,7 @@ class GuestUserSerializer(serializers.ModelSerializer):
         """
 
         model = Guest
-        fields = ["id", "name", "email", "status"]
+        fields = ["id", "name", "email", "status", "created"]
 
     def get_name(self, obj):
         """
@@ -229,7 +230,6 @@ class GuestRegistrationSerializer(serializers.Serializer):
         customer = Customer.objects.get(user_id=current_user)
 
         password = User.objects.make_random_password()
-
         # get the user making the request
         new_user = None
         new_user = User(
@@ -256,6 +256,7 @@ class GuestRegistrationSerializer(serializers.Serializer):
         return new_user
 
     def validate(self, attrs):
+
         if User.objects.filter(email=attrs["email"]).exists():
             serializers.ValidationError("This email is already registered")
 
