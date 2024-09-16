@@ -55,3 +55,19 @@ def create_machine_history(machine: int, actor: int, assigned: int):
         description=f"assigned this virtual machine to {assigned.name}",
         user=actor,
     )
+
+
+@celery_app.task()
+def notify_suspended_user(user: int, suspended: str):
+    """
+    Notify a suspended a user
+    """
+    user = User.objects.get(id=user)
+    status = "suspended"
+    if not suspended:
+        status = "activated"
+    Notification.objects.create(
+        user=user,
+        message=f"""Your account has been {status}""",
+    ),
+    logger.info(f"Customer {user.name} has been {status}")

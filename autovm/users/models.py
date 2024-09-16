@@ -5,6 +5,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+
 from .managers import UserManager
 
 
@@ -47,7 +48,6 @@ class User(AbstractUser):
         All users are customers if their role is not specified.
         """
         super().save(*args, **kwargs)
-
         if self.role == "admin":
             GeneralAdmin.objects.get_or_create(user=self)
         elif self.role == "guest":

@@ -38,6 +38,9 @@ class OperatingSystem(CommonBaseModel):
     name = models.CharField(max_length=100)
 
     def __str__(self):
+        """
+        Return the name of the operating system
+        """
         return self.name
 
 
@@ -95,8 +98,6 @@ class VirtualMachine(CommonBaseModel):
         null=True,
     )
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
-    # ToDo: pricing fields
-    # total_cost = models.DecimalField(max_digits=10, decimal_places=2)
 
     backup_frequency = [
         ("daily", "Daily"),
@@ -127,12 +128,13 @@ class VirtualMachine(CommonBaseModel):
 
         ordering = ["-created"]
 
-    def save(self, *args, **kwargs):
-        self.name = generate_vm_name(type(self))
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.name} ({self.user})"
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = generate_vm_name(type(self))
+        super().save(*args, **kwargs)
 
 
 class VirtualMachineHistory(CommonBaseModel):
@@ -203,6 +205,13 @@ class Notification(CommonBaseModel):
     )
     message = models.CharField(max_length=255)
     read = models.BooleanField(default=False)
+
+    class Meta:
+        """
+        Order for notifications
+        """
+
+        ordering = ["-created"]
 
     def __str__(self):
         return f"Notification for {self.user.name}"

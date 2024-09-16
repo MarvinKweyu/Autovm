@@ -12,3 +12,6 @@ REDIS_URL=redis://redis:6379/0
 # Flower
 CELERY_FLOWER_USER=wPHfHTgYveFuTqyIxpFbcmYNNwHhWvNy
 CELERY_FLOWER_PASSWORD=mJhgApJ3htX5l6QASH0TVjpfHJfZQBPI5dxf0MTEi6E9GgJxbfV5jYgDpFydFBYz
+ADMIN_USERNAME=vmadmin
+ADMIN_EMAIL=vmadmin@virtualmachinemanager.com
+ADMIN_PASSWORD=vmadminpassword

@@ -17,7 +17,7 @@ class VirtualMachineAdmin(admin.ModelAdmin):
 
     list_display = ["name", "user", "is_active", "created", "updated"]
     search_fields = ["name", "user__name"]
-    list_filter = ["user", "is_active"]
+    list_filter = ["user", "is_active", "region"]
     # ordering = ["id"]
 
 
