@@ -41,6 +41,7 @@ urlpatterns += [
     # DRF auth token
     path("api/auth-token/", obtain_auth_token),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path("api/account-auth/", include("dj_rest_auth.urls")),
     path("api/register/", RegistrationView.as_view(), name="custom_register"),
     path(
         "api/account-auth/registration/",  # new

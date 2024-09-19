@@ -108,3 +108,20 @@ class Command(BaseCommand):
                 password="password",
                 role="admin",
             )
+
+        if not User.objects.filter(name=settings.ADMIN_USERNAME).exists():
+            User.objects.create_superuser(
+                name=settings.ADMIN_USERNAME,
+                email=settings.ADMIN_EMAIL,
+                password=settings.ADMIN_PASSWORD,
+                role="admin",
+            )
+            self.stdout.write(
+                self.style.SUCCESS(f"Admin user '{settings.ADMIN_USERNAME}' created")
+            )
+        else:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Admin user '{settings.ADMIN_USERNAME}' already exists"
+                )
+            )

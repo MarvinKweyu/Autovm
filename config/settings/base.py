@@ -347,8 +347,8 @@ REST_FRAMEWORK = {
 CORS_URLS_REGEX = r"^/api/.*$"
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "VMControlHub API",
-    "DESCRIPTION": "Documentation of API endpoints of VMControlHub",
+    "TITLE": "Virtual Machine Control API",
+    "DESCRIPTION": "Documentation of API endpoints of the virtual machine controller API",
     "VERSION": "1.0.0",
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
     "SCHEMA_PATH_PREFIX": "/api/",
