@@ -12,6 +12,7 @@ from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from autovm.users.api.views import GuestRegistrationView
+from autovm.users.api.views import RegistrationView
 
 
 urlpatterns = [
@@ -40,7 +41,7 @@ urlpatterns += [
     # DRF auth token
     path("api/auth-token/", obtain_auth_token),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
-    path("api/account-auth/", include("dj_rest_auth.urls")),
+    path("api/register/", RegistrationView.as_view(), name="custom_register"),
     path(
         "api/account-auth/registration/",  # new
         include("dj_rest_auth.registration.urls"),
@@ -57,9 +58,9 @@ urlpatterns += [
     ),
 ]
 
-admin.site.site_header = "VMControl Developer Admin"
-admin.site.site_title = "Virtual Machine Control Hub Developer Admin Portal"
-admin.site.index_title = "Welcome to the VirtualMachine Control Hub Developer Portal"
+admin.site.site_header = "Virtual Machine Control"
+admin.site.site_title = "Virtual Machine Control Developer Admin Portal"
+admin.site.index_title = "Welcome to the VirtualMachine Controlub Portal"
 
 
 if settings.DEBUG:

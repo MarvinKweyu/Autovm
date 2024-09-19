@@ -1,12 +1,10 @@
-import random
-from django.conf import settings
 from rest_framework import serializers
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 
 from autovm.users.models import User, Customer, Guest
 from autovm.billing.models import BillingAccount
 from autovm.billing.api.serializers import RatePlanSerializer
-from autovm.resources.models import VirtualMachine
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 UserModel = get_user_model()
 
@@ -248,9 +246,9 @@ class GuestRegistrationSerializer(serializers.Serializer):
         message = f"Dear {new_user.name}, \n Your VMControlHub guest account has been created. Your details are as below: \n Login email {new_user.email} \n\n is: {password}"
         # send a confirmation email to the user
         new_user.email_user(
-            "VMControlHub Account Creation",
+            "VMControl Manager Account Creation",
             message,
-            "VMControlHub <no-reply@example.com>",
+            "VMControl Manager <no-reply@example.com>",
         )
 
         return new_user
@@ -281,3 +279,34 @@ class GoogleSocialSerializer(serializers.Serializer):
 
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField()
+
+
+class RegistrationSerializer(serializers.ModelSerializer[User]):
+    """
+    Serializer for registering a new user.
+    """
+
+    role = serializers.CharField(default="customer", required=False)
+
+    class Meta:
+        """
+        Errata
+        """
+
+        model = User
+        fields = ["id", "name", "email", "password", "role"]
+        extra_kwargs = {
+            "password": {"write_only": True},
+        }
+
+    def create(self, validated_data):
+        # Create the user with the validated data
+        user = User(
+            name=validated_data["name"],
+            email=validated_data["email"],
+        )
+
+        user.set_password(validated_data["password"])
+
+        user.save()
+        return user

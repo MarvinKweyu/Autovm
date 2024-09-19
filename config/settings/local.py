@@ -72,3 +72,8 @@ INSTALLED_APPS += ["django_extensions"]
 
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-eager-propagates
 CELERY_TASK_EAGER_PROPAGATES = True
+
+
+ADMIN_USERNAME = env("ADMIN_USERNAME", default="vmadmin")
+ADMIN_EMAIL = env("ADMIN_EMAIL", default="vmadmin@virtualmachinemanager.com")
+ADMIN_PASSWORD = env("ADMIN_PASSWORD", default="vmadminpassword")

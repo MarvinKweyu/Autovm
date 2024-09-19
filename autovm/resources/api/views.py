@@ -2,7 +2,6 @@ from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
@@ -15,10 +14,11 @@ from autovm.resources.models import (
     VirtualMachine,
     VirtualMachineHistory,
 )
-from autovm.resources.tasks import notify_user, create_machine_history
+from autovm.resources.tasks import notify_user
 
-from autovm.users.models import User
+from autovm.users.models import User, Customer
 from autovm.billing.models import Subscription
+from autovm.billing.models import BillingAccount
 from autovm.resources.api.permissions import IsNotSuspendedCustomer
 
 from .serializers import (
@@ -78,10 +78,18 @@ class VirtualMachineViewSet(ModelViewSet):
         "description",
     ]
 
-    # if this is the admin user, return all virtual machines, else, return only those that belong to the user making teh request
+    # if this is the admin user, return all virtual machines, else,
+    # return only those that belong to the user making teh request
     def get_queryset(self):
         if self.request.user.role == "admin":
             return VirtualMachine.objects.all()
+        if self.request.user.role == "guest":
+            # get the customer the guest belongs to and retrieve the customers vms
+            customer = Customer.objects.get(
+                id=self.request.user.guest_profile.customer.id
+            )
+
+            return VirtualMachine.objects.filter(user=customer.user)
         return VirtualMachine.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
@@ -92,8 +100,9 @@ class VirtualMachineViewSet(ModelViewSet):
         if user.role == "admin":
             return super().create(request, *args, **kwargs)
         if user.role == "customer":
+            # get or create the billing account
+            account, created = BillingAccount.objects.get_or_create(user=user)
             # get the billing account
-            account = user.billingaccount
             customer_profile = user.customer_profile
             active_subscription = Subscription.objects.filter(
                 account=account, status="active"
@@ -101,7 +110,7 @@ class VirtualMachineViewSet(ModelViewSet):
             if not active_subscription:
                 return Response(
                     {
-                        "message": """You do not have an active subscription. 
+                        "message": """You do not have an active subscription.
                         Please subscribe and try again."""
                     },
                     status=status.HTTP_402_PAYMENT_REQUIRED,
@@ -180,7 +189,7 @@ class VirtualMachineViewSet(ModelViewSet):
         if backup_count >= backup_limit:
             return Response(
                 {
-                    "message": """You have reached the backup limit for 
+                    "message": """You have reached the backup limit for
                     this virtual machine. Please upgrade your plan to
                     create more backups."""
                 },
@@ -248,8 +257,10 @@ class VirtualMachineViewSet(ModelViewSet):
             virtual_machine.save()
             if assigned_user != previous_user:
 
-                # create a history of the assignment as a background task
-                # create_machine_history.delay(virtual_machine, user, assigned_user)
+                # ? create a history of the assignment as a background task
+                # create_machine_history.delay(
+                # virtual_machine._id,
+                # previous_user.id, assigned_user.id)
                 VirtualMachineHistory.objects.create(
                     virtual_machine=virtual_machine,
                     action="assign_vm",

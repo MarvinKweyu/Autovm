@@ -69,7 +69,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
     """
 
     operating_system = serializers.SerializerMethodField(read_only=True)
-    region = RegionSerializer(read_only=True, required=False)
+    region_name = serializers.SerializerMethodField(read_only=True)
     last_backup = serializers.SerializerMethodField(read_only=True)
     backups = serializers.SerializerMethodField(read_only=True)
     history = VirtualMachineHistorySerializer(required=False, many=True, read_only=True)
@@ -85,6 +85,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
             "_id",
             "name",
             "region",
+            "region_name",
             "description",
             "last_backup",
             "operating_system",
@@ -102,7 +103,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         read_only_fields = ["name"]
 
     def create(self, validated_data):
-        """
+        """G
         Create a virtual machine and associated history.
         """
         user = self.context["request"].user
@@ -116,7 +117,7 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
         VirtualMachineHistory.objects.create(
             virtual_machine=virtual_machine,
             action="create_vm",
-            description="Virtual machine created",
+            description="created a virtual machine",
             user=validated_data["user"],
         )
 
@@ -156,6 +157,15 @@ class VirtualMachineSerializer(serializers.ModelSerializer):
             "email": obj.user.email,
             "role": obj.user.role,
         }
+
+    def get_region_name(self, obj):
+        """
+        Return teh name of teh region this server belongs to
+        """
+        name = None  # use this since test data has no region
+        if obj.region:
+            name = obj.region.name
+        return name
 
 
 class NotificationSerializer(serializers.ModelSerializer):

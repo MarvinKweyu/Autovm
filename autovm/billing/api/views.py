@@ -16,6 +16,8 @@ from autovm.billing.models import RatePlan
 from autovm.billing.models import Subscription
 from autovm.billing.models import Transaction
 
+from autovm.resources.api.permissions import IsAdminOrReadOnly
+
 
 class RatePlanViewSet(ModelViewSet):
     """
@@ -25,9 +27,37 @@ class RatePlanViewSet(ModelViewSet):
     serializer_class = RatePlanSerializer
     queryset = RatePlan.objects.all()
     lookup_field = "pk"
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ["plan", "price", "vm_limit", "backup_limit"]
     search_fields = ["plan", "price", "vm_limit", "backup_limit"]
+
+    @action(
+        detail=False,
+        methods=["post"],
+        name="Initialize Rate Plans",
+    )
+    def initialize(self, request):
+        """
+        Initialize rate plans.
+        """
+        bronze, created = RatePlan.objects.get_or_create(
+            plan="bronze", price=200, vm_limit=2, backup_limit=2
+        )
+        silver, created = RatePlan.objects.get_or_create(
+            plan="silver", price=600, vm_limit=2, backup_limit=2
+        )
+        gold, created = RatePlan.objects.get_or_create(
+            plan="gold", price=800, vm_limit=3, backup_limit=3
+        )
+        platinum, created = RatePlan.objects.get_or_create(
+            plan="platinum", price=1200, vm_limit=8, backup_limit=8
+        )
+
+        return Response(
+            {"message": "Rate plans initialized successfully"},
+            status=status.HTTP_200_OK,
+        )
 
 
 class SubscriptionViewSet(ModelViewSet):
@@ -86,7 +116,7 @@ class BillingAccountViewSet(ModelViewSet):
     def deposit(self, request):
         """
         Deposit money into the user account.
-        Work in progress: Creating a transaction will have the same effect.
+        Work in progress: Currently, creating a transaction will have the same effect.
         """
         user = request.user
         amount = request.data.get("amount")
@@ -109,7 +139,7 @@ class BillingAccountViewSet(ModelViewSet):
         Get the user account balance.
         """
         user = request.user
-        account = BillingAccount.objects.get(user=user)
+        account, created = BillingAccount.objects.get_or_create(user=user)
         return Response(
             {"balance": account.amount},
             status=status.HTTP_200_OK,

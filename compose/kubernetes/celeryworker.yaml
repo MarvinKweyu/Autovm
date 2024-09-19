@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: celeryworker
-        image: <CR_URL>/gallery_production_celeryworker
+        image: <CR_URL>/autovm_production_celeryworker
         args:
           - /start-celeryworker
         envFrom:
@@ -41,7 +41,7 @@ spec:
           periodSeconds: 60
           successThreshold: 10
         volumeMounts:
-          - mountPath: /app/gallery/media
+          - mountPath: /app/autovm/media
             name: media-azurefile
       restartPolicy: Always
       volumes:
