@@ -20,7 +20,7 @@ class IsNotSuspendedCustomer(BasePermission):
         # Ensure the user is authenticated
         if not user.is_authenticated:
             return False
-        
+
         if user.role == "admin" or user.role == "staff":
             return True
 

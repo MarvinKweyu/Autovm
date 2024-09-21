@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('resources', '0007_region_slug_alter_region_name'),
+        ("resources", "0007_region_slug_alter_region_name"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='notification',
-            options={'ordering': ['-created']},
+            name="notification",
+            options={"ordering": ["-created"]},
         ),
     ]
