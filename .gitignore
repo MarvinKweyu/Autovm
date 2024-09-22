@@ -280,3 +280,4 @@ autovm/media/
 .env
 .envs/*
 !.envs/.local/
+compose/kubernetes/secrets/pm.yaml

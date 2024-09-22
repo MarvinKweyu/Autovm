@@ -26,8 +26,8 @@ jobs:
       - name: Build Django image
         run: docker build -f ./compose/production/django/Dockerfile -t autovm_production_django:latest .
 
-      # - name: Build Postgres image
-      #   run: docker build -f ./compose/production/postgres/Dockerfile -t autovm_production_postgres:latest .
+      - name: Build Postgres image
+        run: docker build -f ./compose/production/postgres/Dockerfile -t autovm_production_postgres:latest .
 
       - name: Build Traefik image
         run: docker build -f ./compose/production/traefik/Dockerfile -t autovm_production_traefik:latest .
@@ -48,8 +48,8 @@ jobs:
       - name: Tag Django image
         run: docker tag autovm_production_django:latest ${{ secrets.DOCKERHUB_USER }}/autovm_production_django:latest
 
-      # - name: Tag Postgres image
-      #   run: docker tag autovm_production_postgres:latest ${{ secrets.DOCKERHUB_USER }}/autovm_production_postgres:latest
+      - name: Tag Postgres image
+        run: docker tag autovm_production_postgres:latest ${{ secrets.DOCKERHUB_USER }}/autovm_production_postgres:latest
 
       - name: Tag Traefik image
         run: docker tag autovm_production_traefik:latest ${{ secrets.DOCKERHUB_USER }}/autovm_production_traefik:latest
@@ -70,8 +70,8 @@ jobs:
       - name: Push Django image
         run: docker push ${{ secrets.DOCKERHUB_USER }}/autovm_production_django:latest
 
-      # - name: Push Postgres image
-      #   run: docker push ${{ secrets.DOCKERHUB_USER }}/autovm_production_postgres:latest
+      - name: Push Postgres image
+        run: docker push ${{ secrets.DOCKERHUB_USER }}/autovm_production_postgres:latest
 
       - name: Push Traefik image
         run: docker push ${{ secrets.DOCKERHUB_USER }}/autovm_production_traefik:latest

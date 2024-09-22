@@ -5,8 +5,8 @@ metadata:
   name: postgres-data
 spec:
   accessModes:
-  - ReadWriteOnce
-  storageClassName: retain-azure-disk
+    - ReadWriteOnce
+  storageClassName: default # Use default storage class
   resources:
     requests:
       storage: 1Gi
