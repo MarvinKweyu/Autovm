@@ -5,8 +5,8 @@ metadata:
   name: postgres-backups
 spec:
   accessModes:
-  - ReadWriteOnce
-  storageClassName: default  # managed-premium is preferred however expensive.
+    - ReadWriteOnce
+  storageClassName: default # Use default storage class
   resources:
     requests:
       storage: 1Gi

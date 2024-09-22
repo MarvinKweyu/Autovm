@@ -2,35 +2,25 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   namespace: production
-  name: media-azurefile
+  name: media-local-storage
 spec:
   capacity:
-    storage: 5Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteMany
-  storageClassName: azurefile
-  azureFile:
-    secretName: pv-secrets
-    shareName: aksshare
-    readOnly: false
-  mountOptions:
-  - dir_mode=0777
-  - file_mode=0777
-  - uid=200  # as in compose/production/django/Dockerfile
-  - gid=200
-  - mfsymlinks
-  - nobrl
+  hostPath:
+  /mnt/data
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   namespace: production
-  name: media-azurefile
+  name: media-local-storage
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: azurefile
-  volumeName: media-azurefile
+  volumeName: media-local-storage
   resources:
     requests:
       storage: 5Gi
